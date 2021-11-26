@@ -1,0 +1,60 @@
+---
+title: "Untitled"
+author: "Drew Andersen"
+date: "11/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(here)
+library(tidyverse)
+library(broom)
+library(janitor)
+```
+
+```{r}
+lizards <- read_csv(here("data","lizards.csv"))
+```
+
+```{r}
+lizards %>% 
+  count(spp) %>% 
+  arrange(-n)
+```
+
+```{r}
+utst <- lizards %>% 
+  filter(spp == "UTST",
+         site %in% c("IBPE","RABB","EAST"),
+         tail %in% c("B","W"))
+```
+
+```{r}
+utst %>% 
+  count(site, tail)
+```
+
+```{r}
+tail_counts <- utst %>% 
+  janitor::tabyl(site, tail)
+
+tail_prop <- tail_counts %>% 
+  janitor::adorn_percentages() %>%
+  janitor::adorn_pct_formatting(2) %>% 
+  janitor::adorn_ns()
+```
+
+```{r}
+lizard_ct <- tail_counts %>% 
+  column_to_rownames(var = "site")
+```
+
+```{r}
+lizard_x2 <- chisq.test(lizard_ct)
+lizard_x2
+
+lizard_tidy <- broom::tidy(lizard_x2)
+```
+
+
